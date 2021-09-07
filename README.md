@@ -8,10 +8,10 @@ cross-lingual doc_QA and passage_QA based MRC model , chinese passage and  vi &a
 
 # 调用方法
 ## 初始化和加载模型
-需要给出MRC模型、相关性排序模型和句子切分模型的配置文件(json)
+### 需要给出MRC模型、相关性排序模型和句子切分模型的配置文件(json)
 qa_model = MrcBasedDocModel(mrc_config_fpath, rel_config_fpath, doc_split_config_fpath)
 qa_model.load_model()
 根据输入的<question, context>，进行inference
-# 模型推理
-## 预处理和tokenize部分已封装在predict()中
+## 模型推理
+### 预处理和tokenize部分已封装在predict()中
 qa_model.predict(question, context)
