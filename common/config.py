@@ -26,6 +26,9 @@ MRC模型推理接口相关的配置参数
 class MrcConfig(object):
     def __init__(self, config_fpath):
         config = load_config(config_fpath)
+        self.question_column_name = config["question_column_name"]
+        self.context_column_name = config["context_column_name"]
+        self.id_name = config["id_name"]
         self.max_seq_length = config["max_seq_length"]
         self.pad_to_max_length = config["pad_to_max_length"]
         self.model_name_or_path = config["model_name_or_path"]
@@ -42,6 +45,9 @@ relevance模型推理接口相关的配置参数
 class RelConfig(object):
     def __init__(self, config_fpath):
         config = load_config(config_fpath)
+        self.question_column_name = config["question_column_name"]
+        self.context_column_name = config["context_column_name"]
+        self.id_name = config["id_name"]
         self.max_seq_length = config["max_seq_length"]
         self.pad_to_max_length = config["pad_to_max_length"]
         self.model_name_or_path = config["model_name_or_path"]

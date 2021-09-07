@@ -168,7 +168,8 @@ def postprocess_qa_predictions(
         # Use the offsets to gather the answer text in the original context.
         context = example["context"]
         for pred in predictions:
-            offsets = pred.pop("offsets")
+            #offsets = pred.pop("offsets")
+            offsets = pred.get("offsets")
             pred["text"] = context[offsets[0] : offsets[1]]
 
         # In the very rare edge case we have not a single non-null prediction, we create a fake prediction to avoid
@@ -188,7 +189,9 @@ def postprocess_qa_predictions(
 
         # Pick the best prediction. If the null answer is not possible, this is easy.
         if not version_2_with_negative:
-            all_predictions[example["id"]] = predictions[0]["text"]
+            offsets = predictions[0]["offsets"]
+            text = predictions[0]["text"]
+            all_predictions[example["id"]] = (offsets[0], offsets[1], text)
         else:
             # Otherwise we first need to find the best non-empty prediction.
             i = 0
@@ -236,7 +239,7 @@ def postprocess_qa_predictions(
             with open(null_odds_file, "w") as writer:
                 writer.write(json.dumps(scores_diff_json, indent=4) + "\n")
 
-    return all_predictions
+    return all_predictions[0]
 
 
 def postprocess_qa_predictions_with_beam_search(

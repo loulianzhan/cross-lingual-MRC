@@ -16,7 +16,6 @@ class DocSplitModel(object):
     def split(self, document):
         sentence = re.findall(hanzi.sentence, document)
         num_sent = len(sentence)
-        print(num_sent)
         # 滑窗切分成passage，以句子为单位步长
         if num_sent <= self.passage_window_length:
             return "".join(sentence)

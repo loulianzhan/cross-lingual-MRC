@@ -7,11 +7,10 @@ convert raw input into example
 raw input : [{"question" : xxx , "context" : yyy}]
 output : exmaple
 """
-question_column_name = "question"
-context_column_name = "context"
-id_name = "id"
 
-def convert_into_dataset_instance(question, context):
+from datasets import Dataset
+
+def convert_into_dataset_instance(question, context, question_column_name, context_column_name, id_name):
     if isinstance(question, str) and isinstance(context, str):
         example_id = 0
         input_dict = {id_name: [example_id], question_column_name : [question], context_column_name : [context]}
