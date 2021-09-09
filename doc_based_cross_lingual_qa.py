@@ -6,6 +6,10 @@
 
 import json
 import os
+
+# 根据实际GPU情况选取
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 import sys
 from common.config import MrcConfig, RelConfig, DocSplitConfig
 from mrc_model import MrcModel
