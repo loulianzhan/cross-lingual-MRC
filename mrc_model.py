@@ -36,13 +36,16 @@ from transformers import (
 from transformers.utils.versions import require_version
 
 from common.utils_qa import postprocess_qa_predictions
-from common.data_utils import convert_into_dataset_instance
+from common.data_utils import convert_into_dataset_instance, create_and_fill_np_array
 from common.config import MrcConfig, RelConfig, DocSplitConfig
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/question-answering/requirements.txt")
 
 logger = logging.getLogger(__name__)
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+logger.info('Using device:', device)
 
 class MrcModel(object):
     def __init__(self, args):
@@ -150,19 +153,24 @@ class MrcModel(object):
         # Prediction
         all_start_logits = []
         all_end_logits = []
+        self.model = self.model.to(device)
         for step, batch in enumerate(predict_dataloader):
             with torch.no_grad():
-                outputs = self.model(**batch)
+                attention_mask, input_ids = batch["attention_mask"].to(device), batch["input_ids"].to(device)
+                outputs = self.model(attention_mask = attention_mask, input_ids = input_ids)
                 start_logits = outputs.start_logits
                 end_logits = outputs.end_logits
     
             all_start_logits.append(start_logits.cpu().numpy())
             all_end_logits.append(end_logits.cpu().numpy())
-        all_start_logits = np.array(start_logits)
-        all_end_logits = np.array(end_logits)
-    
+
+        max_len = max([x.shape[1] for x in all_start_logits])  # Get the max_length of the tensor
+        # concatenate the numpy array
+        start_logits_concat = create_and_fill_np_array(all_start_logits, input_features, max_len)
+        end_logits_concat = create_and_fill_np_array(all_end_logits, input_features, max_len)
+
         # post-process predition result
-        outputs_numpy = (all_start_logits, all_end_logits)
+        outputs_numpy = (start_logits_concat, end_logits_concat)
         predictions = postprocess_qa_predictions(
                 examples=input_examples,
                 features=input_features,
@@ -180,6 +188,7 @@ if __name__ == "__main__":
     mrc_model = MrcModel(mrc_config)
     mrc_model.load_model()
     question = "Panthers đã mất bao nhiêu điểm trong phòng thủ?"
-    context = "黑豹队的防守只丢了 308分，在联赛中排名第六，同时也以 24 次拦截领先国家橄榄球联盟 (NFL)，并且四次入选职业碗。职业碗防守截锋卡万·肖特以 11 分领先于全队，同时还有三次迫使掉球和两次重新接球。他的队友马里奥·爱迪生贡献了 6½ 次擒杀。黑豹队的防线上有经验丰富的防守端锋贾里德·艾伦，他是五次职业碗选手，曾以 136 次擒杀成为 NFL 职业生涯中的活跃领袖。另外还有在 9 场首发中就拿下 5 次擒杀的防守端锋科尼·伊利。在他们身后，黑豹队的三名首发线卫中有两人入选了职业碗：托马斯·戴维斯和卢克·坎克利。戴维斯完成了 5½ 次擒杀、四次迫使掉球和四次拦截，而坎克利带领球队在擒抱 (118) 中迫使两次掉球并拦截了他自己的四次传球。卡罗莱纳的第二防线有职业碗安全卫科特·科尔曼和职业碗角卫约什·诺曼，科尔曼带领球队完成了职业生涯中高达七次拦截并同时贡献了 88 次擒抱，而诺曼在本赛季成长为一名封锁角卫并完成了四次拦截，其中两次被判触地得分。"
+    context = ["黑豹队的防守只丢了 308分，在联赛中排名第六，同时也以 24 次拦截领先国家橄榄球联盟 (NFL)，并且四次入选职业碗。职业碗防守截锋卡万·肖特以 11 分领先于全队，同时还有三次迫使掉球和两次重新接球。他的队友马里奥·爱迪生贡献了 6½ 次擒杀。黑豹队的防线上有经验丰富的防守端锋贾里德·艾伦，他是五次职业碗选手，曾以 136 次擒杀成为 NFL 职业生涯中的活跃领袖。另外还有在 9 场首发中就拿下 5 次擒杀的防守端锋科尼·伊利。在他们身后，黑豹队的三名首发线卫中有两人入选了职业碗：托马斯·戴维斯和卢克·坎克利。戴维斯完成了 5½ 次擒杀、四次迫使掉球和四次拦截，而坎克利带领球队在擒抱 (118) 中迫使两次掉球并拦截了他自己的四次传球。卡罗莱纳的第二防线有职业碗安全卫科特·科尔曼和职业碗角卫约什·诺曼，科尔曼带领球队完成了职业生涯中高达七次拦截并同时贡献了 88 次擒抱，而诺曼在本赛季成长为一名封锁角卫并完成了四次拦截，其中两次被判触地得分。"]*2
+    print(len(context[0]))
     mrc_pred = mrc_model.predict(question , context)
     print(mrc_pred)

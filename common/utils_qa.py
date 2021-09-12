@@ -239,7 +239,7 @@ def postprocess_qa_predictions(
             with open(null_odds_file, "w") as writer:
                 writer.write(json.dumps(scores_diff_json, indent=4) + "\n")
 
-    return all_predictions[0]
+    return all_predictions
 
 
 def postprocess_qa_predictions_with_beam_search(
