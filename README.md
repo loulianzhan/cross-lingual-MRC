@@ -1,7 +1,7 @@
 # cross-lingual-MRC
 cross-lingual doc_QA and passage_QA based MRC model , chinese passage and  vi &amp; ru question
 
-# 两种模式，提供两种推理接口
+## 两种模式，提供两种推理接口
 ### 单passage自由提问系统                                                                                                                                               
 单MRC模型，给定passage，提出question，基于passage给出答案
 ### 单doc自由提问系统
@@ -9,13 +9,14 @@ cross-lingual doc_QA and passage_QA based MRC model , chinese passage and  vi &a
 
 推理过程代码封装在doc_based_cross_lingual_qa.py  
 主要包含两个阶段：
-load_model()
-passage_qa_predict() # 单passage自由提问系统
+load_model()  
+passage_qa_predict() # 单passage自由提问系统  
 passage_qa_predict() # 单doc自由提问系统
 
 ## 调用方法
 ### 初始化和加载模型
-模型初始化只需要model_dir即可，model_dir必需包含：MRC模型、相关性排序模型和句子切分模型的配置文件(json)等文件
+模型初始化只需要model_dir即可，model_dir  
+必需包含：MRC模型、相关性排序模型和句子切分模型的配置文件(json)等文件
 
 qa_model = MrcBasedDocModel(model_dir)  
 qa_model.load_model()
