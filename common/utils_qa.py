@@ -184,14 +184,17 @@ def postprocess_qa_predictions(
         probs = exp_scores / exp_scores.sum()
 
         # Include the probabilities in our predictions.
-        for prob, pred in zip(probs, predictions):
-            pred["probability"] = prob
+        for score, pred in zip(scores, predictions):
+            pred["probability"] = score
+        #for prob, pred in zip(probs, predictions):
+        #    pred["probability"] = prob
 
         # Pick the best prediction. If the null answer is not possible, this is easy.
         if not version_2_with_negative:
             offsets = predictions[0]["offsets"]
             text = predictions[0]["text"]
-            all_predictions[example["id"]] = (offsets[0], offsets[1], text)
+            score = predictions[0]["probability"]
+            all_predictions[example["id"]] = (offsets[0], offsets[1], text, score)
         else:
             # Otherwise we first need to find the best non-empty prediction.
             i = 0

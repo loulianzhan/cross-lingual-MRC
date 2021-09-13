@@ -4,6 +4,7 @@
 基于文档提问的机器阅读理解模型的接口
 """
 
+import logging
 import json
 import os
 
@@ -16,6 +17,8 @@ from mrc_model import MrcModel
 from classify_model import ClassifyModel 
 from split_doc import DocSplitModel
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 class MrcBasedDocModel(object):
     # 初始化参数
@@ -51,11 +54,13 @@ class MrcBasedDocModel(object):
     def doc_qa_predict(self, question , document):
         # 切分长文档
         passage = self.doc_split_model.split(document)
+        logger.info(f"passage split result : {passage}")
 
         # 排序模型
         scores = self.classify_model.predict(question, passage)
         index_of_top_pred = np.argmax(scores)
         context = passage[index_of_top_pred]
+        logger.info(f"passage selected by TOP1 : {context}")
 
         # MRC预测
         mrc_pred = self.mrc_model.predict(question, context)
@@ -88,6 +93,8 @@ if __name__=="__main__":
     end = time.time()
     print("average time for prediction : {}".format(float(end-start)/len(question)))
     
+    question = "Tổng Bí thư Tập Cận Bình thị sát Làng Mao Đài Sơn vào tháng mấy?"
+    document = open("/raid/loulianzhang/MRC/temp.txt","r").read()
     # <限定doc模式>
-    #prediction = qa_model.doc_qa_predict(question , context)
-    #print(prediction)
+    prediction = qa_model.doc_qa_predict(question , document)
+    print(prediction)
