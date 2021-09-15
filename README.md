@@ -47,8 +47,11 @@ score   分数，浮点数    float
 ### GPU调用
 #### 如有需要，请自行指定具体GPU环境的机器编号device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  
-model.to(device)
+model.to(device)  
 input.to(device)
 
 ### 批测脚本
 在doc_based_cross_lingual_qa.py的main()加入批测脚本，方便离线自测
+
+## 启动web服务代码
+python app.py
